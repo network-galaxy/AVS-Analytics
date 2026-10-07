@@ -1,0 +1,44 @@
+I am attaching a single-file HTML report ("Migration Programme Report"). It is ~5 MB
+because it inlines the Plotly library — IGNORE every <script> block and read only the
+content inside <main>…</main>.
+
+PROBLEM: In the "EOS Migrations" report, the executive-summary tile "Nodes Migrated"
+(or "Hosts/Cores Migrated") under the "Reporting Period" row shows 325, but the
+"Number of hosts migrated" row of the "Monthly programme matrix" adds up to 328.
+Find exactly which records explain the difference of 3.
+
+WHERE THE DATA IS
+1. The tile's records: inside the EOS report section (<section id="rpt-eos">), the
+   headline tiles are elements with class "kpi" and an attribute data-tile. Use the
+   Reporting Period row — its ids start with "sel-" (e.g. data-tile="sel-kpi-eos-hosts").
+   The records behind that tile are in the <table class="data"> whose id equals that
+   data-tile value. Each row is one wave record. Relevant columns: TPID, Customer Name,
+   Most Recent / Latest Wave, Actual End Date, End date used, End date read from,
+   Total Cores, Migration Status. Also note the period printed under the tile
+   (e.g. "Reporting Period · 01 Jul 2025 → 30 Sep 2026").
+2. The matrix: the tables with ids starting "mx-" are the month grids (use "mx-alleos",
+   the "All EOS migrations" block; "mx-gen1" and "mx-gen2" are its parts). The records
+   behind every matrix cell are in the table with id "mxa-alleos". Keep only rows whose
+   "Measure" column is "Number of hosts migrated". Relevant columns: Measure, Month,
+   TPID, Customer Name, Date counted, Date read from, Most Recent / Latest Wave,
+   Total Cores.
+
+WHAT TO DO
+a. Sum Total Cores over the tile's table and over the filtered mxa-alleos rows, and
+   confirm the two totals (expect 325 and 328). Also sum the "Number of hosts migrated"
+   row of mx-alleos across its month columns (not the "FYxx Total" columns) and its
+   FY Total columns separately.
+b. Match records between the two lists on (TPID, Most Recent / Latest Wave, Total Cores,
+   and the date: "End date used" in the tile vs "Date counted" in the matrix).
+c. List every record that is in one list but not the other, with all its columns.
+d. For each unmatched record, say whether its date falls outside the tile's period
+   (before its start or after its end), whether the same TPID+wave appears twice in
+   either list (a duplicate), or whether the dates differ between the two lists for the
+   same TPID+wave.
+e. Check whether any Total Cores value is not a whole number, and whether any month cell
+   in mx-alleos differs from the sum of its records' Total Cores (rounding).
+f. Report the as-of / latest month shown in the matrix (its last month column).
+
+OUTPUT: a short table of the unmatched records (TPID, Customer, Wave, Total Cores,
+date in tile, date in matrix, reason), then the two totals and a one-paragraph
+conclusion naming the cause. Do not guess — quote the values you read.
